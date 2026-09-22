@@ -20,7 +20,7 @@ By decoupling the runtime services, this boilerplate ensures your primary applic
 ## Included Platform Services
 
 - API: [NGINX + GO 1.25](./platforms/nginx-go-1.25/README.md)
-- Database: [Mongodb 8+](./platforms/mongodb-8/README.md)
+- Database: [MONGODB 8+](./platforms/mongodb-8/README.md)
 - Mail Sandbox: [MAILHOG 1+](./platforms/mailhog-1/README.md)
 - Message Broker: [RABBITMQ 4+](./platforms/rabbitmq-4/README.md)
 <br><br>

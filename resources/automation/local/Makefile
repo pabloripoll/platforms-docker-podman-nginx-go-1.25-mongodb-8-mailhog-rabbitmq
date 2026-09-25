@@ -70,7 +70,7 @@ network-destroy: ## destroys network
 # -------------------------------------------------------------------------------------------------
 #  Backend API Service
 # -------------------------------------------------------------------------------------------------
-.PHONY: apirest-hostcheck apirest-info apirest-set apirest-create apirest-network apirest-ssh apirest-start apirest-stop apirest-destroy
+.PHONY: apirest-hostcheck apirest-info apirest-set apirest-create apirest-network apirest-ssh apirest-start apirest-stop apirest-down apirest-destroy
 
 apirest-hostcheck: ## shows this project ports availability on local machine for apirest container
 	cd platforms/$(APIREST_PLTF) && $(MAKE) port-check
@@ -258,7 +258,7 @@ mongo-client-destroy: ## destroys completly the database container with its data
 # -------------------------------------------------------------------------------------------------
 #  Mailer Service
 # -------------------------------------------------------------------------------------------------
-.PHONY: mailer-hostcheck mailer-info mailer-set mailer-create mailer-network mailer-ssh mailer-start mailer-stop mailer-destroy
+.PHONY: mailer-hostcheck mailer-info mailer-set mailer-create mailer-network mailer-ssh mailer-start mailer-stop mailer-down mailer-destroy
 
 mailer-hostcheck: ## shows this project ports availability on local machine for mailer container
 	cd platforms/$(MAILER_PLTF) && $(MAKE) port-check
@@ -319,7 +319,7 @@ mailer-destroy: ## destroys completly the mailer container
 # -------------------------------------------------------------------------------------------------
 #  Broker Service
 # -------------------------------------------------------------------------------------------------
-.PHONY: broker-hostcheck broker-info broker-set broker-create broker-network broker-ssh broker-start broker-stop broker-destroy
+.PHONY: broker-hostcheck broker-info broker-set broker-create broker-network broker-ssh broker-start broker-stop broker-down broker-destroy
 
 broker-hostcheck: ## shows this project ports availability on local machine for broker container
 	cd platforms/$(BROKER_PLTF) && $(MAKE) port-check

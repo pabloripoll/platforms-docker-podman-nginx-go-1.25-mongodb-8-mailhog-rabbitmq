@@ -27,11 +27,12 @@ DOCKER_CNET=$(PROJECT_CNET)
 DOCKER_HOST=$(PROJECT_HOST)
 DOCKER_IMGK=$(MONGODB_IMGK)
 DOCKER_CAAS=$(MONGODB_CAAS)
-DOCKER_DATA=$(MONGODB_DATA)
 DOCKER_PORT=$(MONGODB_PORT)
 DOCKER_CPUS=$(MONGODB_CPUS)
 DOCKER_MEMO=$(MONGODB_MEMO)
 DOCKER_SWAP=$(MONGODB_SWAP)
+DOCKER_DATA=$(MONGODB_DATA)
+DOCKER_LOGS=$(MONGODB_LOGS)
 DOCKER_CLIENT_IMGK=$(MONGODB_CLIENT_IMGK)
 DOCKER_CLIENT_PORT=$(MONGODB_CLIENT_PORT)
 DOCKER_CLIENT_CPUS=$(MONGODB_CLIENT_CPUS)
@@ -91,27 +92,28 @@ env-set: ## sets docker .env file
 ifeq ($(DETECTED_OS), Windows)
 	echo "Recipe do not support for Windows NT at this moment - You have to manually create .env file from ./docker/.env.example";
 else
-	echo "COMPOSE_LEAD=\"$(DOCKER_LEAD)\"\r\n\
-	COMPOSE_CNET=\"$(DOCKER_CNET)\"\r\n\
-	COMPOSE_IMGK=\"$(DOCKER_IMGK)\"\r\n\
-	COMPOSE_NAME=\"$(DOCKER_CAAS)\"\r\n\
-	COMPOSE_HOST=$(DOCKER_HOST)\r\n\
-	COMPOSE_DATA=\"$(DOCKER_DATA)\"\r\n\
-	COMPOSE_CPUS=$(DOCKER_CPUS)\r\n\
-	COMPOSE_MEMO=$(DOCKER_MEMO)\r\n\
-	COMPOSE_SWAP=$(DOCKER_SWAP)\r\n\
-	COMPOSE_PORT=$(DOCKER_PORT)\r\n\
-	MONGODB_INITDB_DATABASE=$(MONGODB_NAME)\r\n\
-	MONGODB_INITDB_ROOT_USERNAME=$(MONGODB_USER)\r\n\
-	MONGODB_INITDB_ROOT_PASSWORD=\"$(MONGODB_PASS)\"\r\n\
-	COMPOSE_CLIENT_IMGK=\"$(DOCKER_CLIENT_IMGK)\"\r\n\
-	COMPOSE_CLIENT_CPUS=$(DOCKER_CLIENT_CPUS)\r\n\
-	COMPOSE_CLIENT_MEMO=$(DOCKER_CLIENT_MEMO)\r\n\
-	COMPOSE_CLIENT_SWAP=$(DOCKER_CLIENT_SWAP)\r\n\
-	COMPOSE_CLIENT_PORT=$(DOCKER_CLIENT_PORT)\r\n\
-	MONGODB_EXPRESS_USERNAME=$(MONGODB_CLIENT_USER)\r\n\
-	MONGODB_EXPRESS_PASSWORD=\"$(MONGODB_CLIENT_PASS)\"\r\n\
-	COMPOSE_IGNORE_ORPHANS="true"" > ./docker/.env; \
+	@echo "COMPOSE_LEAD=$(DOCKER_LEAD)" > ./docker/.env
+	@echo "COMPOSE_CNET=$(DOCKER_CNET)" >> ./docker/.env
+	@echo "COMPOSE_IMGK=$(DOCKER_IMGK)" >> ./docker/.env
+	@echo "COMPOSE_NAME=$(DOCKER_CAAS)" >> ./docker/.env
+	@echo "COMPOSE_HOST=$(DOCKER_HOST)" >> ./docker/.env
+	@echo "COMPOSE_CPUS=$(DOCKER_CPUS)" >> ./docker/.env
+	@echo "COMPOSE_MEMO=$(DOCKER_MEMO)" >> ./docker/.env
+	@echo "COMPOSE_SWAP=$(DOCKER_SWAP)" >> ./docker/.env
+	@echo "COMPOSE_PORT=$(DOCKER_PORT)" >> ./docker/.env
+	@echo "COMPOSE_DATA=\"$(DOCKER_DATA)\"" >> ./docker/.env
+	@echo "COMPOSE_LOGS=\"$(DOCKER_LOGS)\"" >> ./docker/.env
+	@echo "MONGODB_INITDB_DATABASE=$(MONGODB_NAME)" >> ./docker/.env
+	@echo "MONGODB_INITDB_ROOT_USERNAME=$(MONGODB_USER)" >> ./docker/.env
+	@echo "MONGODB_INITDB_ROOT_PASSWORD=\"$(MONGODB_PASS)\"" >> ./docker/.env
+	@echo "COMPOSE_CLIENT_IMGK=$(DOCKER_CLIENT_IMGK)" >> ./docker/.env
+	@echo "COMPOSE_CLIENT_CPUS=$(DOCKER_CLIENT_CPUS)" >> ./docker/.env
+	@echo "COMPOSE_CLIENT_MEMO=$(DOCKER_CLIENT_MEMO)" >> ./docker/.env
+	@echo "COMPOSE_CLIENT_SWAP=$(DOCKER_CLIENT_SWAP)" >> ./docker/.env
+	@echo "COMPOSE_CLIENT_PORT=$(DOCKER_CLIENT_PORT)" >> ./docker/.env
+	@echo "MONGODB_EXPRESS_USERNAME=$(MONGODB_CLIENT_USER)" >> ./docker/.env
+	@echo "MONGODB_EXPRESS_PASSWORD=\"$(MONGODB_CLIENT_PASS)\"" >> ./docker/.env
+	@echo "COMPOSE_IGNORE_ORPHANS=true" >> ./docker/.env
 	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" DOCUMENT DB "${C_YEL}$(DOCKER_PLTF)${C_END}" - "${C_YEL}"docker-compose.yml"${C_END}" .env file "${C_GRN}"has been set."${C_END};
 	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" DOCUMENT DB "${C_YEL}$(DOCKER_PLTF)${C_END}" - Container name: "${C_GRN}$(DOCKER_CONTAINER)${C_END}
 	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" DOCUMENT DB "${C_YEL}$(DOCKER_PLTF)${C_END}" - Container image: "${C_GRN}$(DOCKER_IMGK)${C_END}
@@ -130,7 +132,7 @@ endif
 # -------------------------------------------------------------------------------------------------
 #  Database Container
 # -------------------------------------------------------------------------------------------------
-.PHONY: info ssh build up dev start stop restart clear destroy
+.PHONY: info ssh up build network start stop restart clear destroy dev
 
 info: ## shows container information
 	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" - DATABASE: "${C_GRN}"$(DOCKER_PLTF)"${C_END};
@@ -167,13 +169,13 @@ restart: ## restarts the running container
 	cd docker && $(DOCKER) restart $(DOCKER_CONTAINER)
 
 clear: ## removes container from Docker running containers
-	cd docker && $(DOCKER_COMPOSE) -f docker-compose.yml -f docker-compose.network.yml kill || true
-	cd docker && $(DOCKER_COMPOSE) -f docker-compose.yml -f docker-compose.network.yml rm --force || true
-	cd docker && $(DOCKER_COMPOSE) -f docker-compose.yml -f docker-compose.network.yml down -v --remove-orphans || true
+	cd docker && $(DOCKER_COMPOSE) kill || true
+	cd docker && $(DOCKER_COMPOSE) down --volumes --remove-orphans || true
 
 destroy: ## delete container image from Docker cache
 	cd docker && $(DOCKER) rmi -f $(DOCKER_IMGK)
-	cd docker && $(SUDO) rm -rf $(DOCKER_DATA)
+	$(SUDO) rm -rf $(DOCKER_DATA)
+	$(SUDO) rm -rf $(DOCKER_LOGS)
 
 dev: ## sets a development enviroment
 	echo ${C_YEL}"\"dev\" recipe has not usage in this project"${C_END};
@@ -218,9 +220,8 @@ restart-client: ## restarts the running client container
 	cd docker && $(DOCKER) restart $(DOCKER_CONTAINER)-client
 
 clear-client: ## removes client container from Docker running containers
-	cd docker && $(DOCKER_COMPOSE) -f docker-compose.client.yml -f docker-compose.client.public.yml kill || true
-	cd docker && $(DOCKER_COMPOSE) -f docker-compose.client.yml -f docker-compose.client.public.yml rm --force || true
-	cd docker && $(DOCKER_COMPOSE) -f docker-compose.client.yml -f docker-compose.client.public.yml down -v --remove-orphans || true
+	cd docker && $(DOCKER_COMPOSE) kill || true
+	cd docker && $(DOCKER_COMPOSE) down --volumes --remove-orphans || true
 
 destroy-client: ## delete client container image from Docker images cache
 	cd docker && $(DOCKER) rmi -f $(DOCKER_CLIENT_IMGK)

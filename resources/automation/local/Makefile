@@ -145,7 +145,7 @@ mongo-set: ## sets the database and client enviroment file to build both contain
 
 # --- #
 
-.PHONY: mongo-info mongo-build mongo-create mongo-ssh mongo-start mongo-stop mongo-destroy
+.PHONY: mongo-info mongo-build mongo-create mongo-ssh mongo-start mongo-stop mongo-down mongo-destroy
 
 mongo-info: ## shows docker related information
 	cd platforms/$(MONGODB_PLTF) && $(MAKE) info
@@ -201,7 +201,7 @@ mongo-destroy: ## destroys completly the database container with its data
 
 # --- #
 
-.PHONY: mongo-client-info mongo-client-build mongo-client-create mongo-client-ssh mongo-client-start mongo-client-stop mongo-client-destroy
+.PHONY: mongo-client-info mongo-client-build mongo-client-create mongo-client-ssh mongo-client-start mongo-client-stop mongo-client-down mongo-client-destroy
 
 mongo-client-info: ## shows docker related information
 	cd platforms/$(MONGODB_PLTF) && $(MAKE) info-client

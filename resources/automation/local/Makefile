@@ -106,18 +106,28 @@ apirest-stop: ## stops the apirest container but its assets will not be destroye
 apirest-restart: ## restarts the running apirest container
 	cd platforms/$(APIREST_PLTF) && $(MAKE) restart
 
-apirest-destroy: ## destroys completly the apirest container
+apirest-down: ## stops and removes the container, network and volume established
+	echo ${C_RED}"Attention!"${C_END};
+	echo ${C_YEL}"You're about to stop and remove the "${C_BLU}"$(APIREST_PLTF)"${C_END}" container with its network and volume."${C_END};
+	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
+        echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
+    else \
+		cd platforms/$(APIREST_PLTF) && $(MAKE) clear; \
+		echo ${C_GRN}"O.K.! $(APIREST_PLTF) has been cleared down."${C_END}; \
+	fi
+
+apirest-destroy: ## destroys completely the apirest container and its image
 	echo ${C_RED}"Attention!"${C_END};
 	echo ${C_YEL}"You're about to remove the "${C_BLU}"$(APIREST_PLTF)"${C_END}" container and delete its image resource."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
-        echo ${C_GRN}"K.O.! container has been stopped but not destroyed."${C_END}; \
+        echo ${C_GRN}"O.K.! container continues with its latest status."${C_END}; \
     else \
-		cd platforms/$(APIREST_PLTF) && $(MAKE) stop clear destroy; \
+		cd platforms/$(APIREST_PLTF) && $(MAKE) clear destroy; \
 		echo -n ${C_GRN}"Do you want to clear DOCKER cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
 			echo ${C_YEL}"The following command is delegated to be executed by user:"${C_END}; \
 			echo "$$ $(DOCKER) system prune"; \
 		else \
-			$(DOCKER) system prune; \
+			$(DOCKER) system prune -f; \
 			echo ${C_GRN}"O.K.! DOCKER cache has been cleared up."${C_END}; \
 		fi \
 	fi

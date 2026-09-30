@@ -1,3 +1,2 @@
-# .gitignore custom settings
-/.env
-/Dockerfile
+# Ignore custom settings
+.env
